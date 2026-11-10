@@ -27,7 +27,19 @@ jobs:
           pip install buildozer "cython<3.1"
 
       - name: Compiler l'APK
-        run: buildozer -v android debug
+        run: |
+          set +e
+          buildozer -v android debug > build.log 2>&1
+          echo $? > exit_code.txt
+          tail -n 300 build.log > erreur.txt
+          exit $(cat exit_code.txt)
+
+      - name: Garder le résumé de l'erreur
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: erreur
+          path: erreur.txt
 
       - uses: actions/upload-artifact@v4
         with:
